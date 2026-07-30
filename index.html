@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generator LKPD AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;0,900;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --navy:#1B2A4A;
+    --navy-deep:#0F1B33;
+    --gold:#D9A441;
+    --gold-soft:#F3DFAE;
+    --teal:#2A9D8F;
+    --teal-soft:#DCEFEC;
+    --coral:#E0637A;
+    --coral-soft:#FBE3E8;
+    --violet:#7B5EA7;
+    --violet-soft:#EAE3F5;
+    --cream:#FBF7EF;
+    --paper:#FFFFFF;
+    --ink:#22293B;
+    --ink-soft:#5B6478;
+    --line:#E4DCC9;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Plus Jakarta Sans', sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    display:grid;
+    grid-template-columns:360px 1fr;
+    min-height:100vh;
+  }
+  @media (max-width:900px){
+    .app{grid-template-columns:1fr;}
+  }
+
+  /* ---------- CONTROL PANEL ---------- */
+  .panel{
+    background:var(--navy-deep);
+    color:#fff;
+    padding:28px 24px 40px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .panel h1{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:22px;
+    line-height:1.2;
+    margin:0 0 2px;
+  }
+  .panel .sub{
+    font-size:13px;
+    color:#A9B4CE;
+    margin:0 0 8px;
+    line-height:1.5;
+  }
+  .field label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    color:var(--gold-soft);
+    margin-bottom:6px;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;
+    background:#1F3050;
+    border:1px solid #33456A;
+    color:#fff;
+    border-radius:8px;
+    padding:10px 12px;
+    font-family:inherit;
+    font-size:14px;
+    outline:none;
+    transition:border-color .15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    border-color:var(--teal);
+  }
+  .row3{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+  }
+  .divider{
+    height:1px;
+    background:#2A3B5C;
+    margin:6px 0;
+  }
+  .counts{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+  }
+  .counts .field label{font-size:10.5px;}
+  .btn{
+    border:none;
+    border-radius:9px;
+    padding:13px 16px;
+    font-family:inherit;
+    font-weight:700;
+    font-size:14.5px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:transform .12s, filter .12s;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn-primary{
+    background:linear-gradient(135deg, var(--gold) 0%, #C98A2C 100%);
+    color:var(--navy-deep);
+    margin-top:6px;
+  }
+  .btn-primary:hover{filter:brightness(1.06);}
+  .btn-primary:disabled{opacity:.6; cursor:default;}
+  .btn-secondary{
+    background:var(--teal);
+    color:#fff;
+  }
+  .btn-secondary:hover{filter:brightness(1.08);}
+  .btn-ghost{
+    background:transparent;
+    border:1px solid #33456A;
+    color:#C9D2E6;
+  }
+  .status{
+    font-size:12.5px;
+    color:#A9B4CE;
+    min-height:16px;
+    line-height:1.5;
+  }
+  .status.error{color:#F2A0A0;}
+  .status.ok{color:#8FDCC0;}
+  .hint{
+    font-size:11.5px;
+    color:#7D89A8;
+    line-height:1.5;
+    margin-top:-8px;
+  }
+  .panel-footer{
+    margin-top:auto;
+    padding-top:14px;
+    font-size:11px;
+    color:#5E6A8A;
+    line-height:1.5;
+  }
+
+  /* ---------- PREVIEW ---------- */
+  .preview-wrap{
+    padding:32px 24px 60px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:16px;
+    overflow-x:auto;
+  }
+  .toolbar{
+    width:794px;
+    max-width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  .toolbar .label{
+    font-size:13px;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  .toolbar .actions{display:flex; gap:8px;}
+  .toolbar .btn{padding:9px 14px; font-size:13px;}
+  .toolbar .btn-secondary{background:var(--navy); color:#fff;}
+
+  #sheet{
+    width:794px;
+    max-width:100%;
+    background:var(--paper);
+    border-radius:14px;
+    box-shadow:0 10px 40px rgba(27,42,74,.14);
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* header */
+  .sheet-header{
+    background:linear-gradient(120deg, var(--navy) 0%, var(--navy-deep) 100%);
+    padding:26px 30px 22px;
+    position:relative;
+    color:#fff;
+    overflow:hidden;
+  }
+  .sheet-header::before{
+    content:"";
+    position:absolute;
+    right:-40px; top:-60px;
+    width:220px; height:220px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(217,164,65,.22) 0%, rgba(217,164,65,0) 70%);
+  }
+  .badge-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .seal{
+    width:44px; height:44px;
+    border-radius:50%;
+    background:var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;
+    font-weight:900;
+    font-size:14px;
+    color:var(--navy-deep);
+    flex-shrink:0;
+    border:2px solid #fff2;
+  }
+  .eyebrow{
+    font-size:11.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--gold-soft);
+    font-weight:700;
+  }
+  .h-title{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:27px;
+    line-height:1.18;
+    margin:2px 0 4px;
+    max-width:520px;
+  }
+  .h-meta{
+    display:inline-block;
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.2);
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:12.5px;
+    font-weight:600;
+    margin-top:4px;
+  }
+  .h-goal{
+    margin-top:14px;
+    background:rgba(255,255,255,.07);
+    border-left:3px solid var(--gold);
+    padding:10px 14px;
+    border-radius:6px;
+    font-size:12.5px;
+    line-height:1.55;
+    max-width:640px;
+  }
+  .h-goal b{color:var(--gold-soft);}
+  .name-row{
+    margin-top:16px;
+    background:#fff;
+    border-radius:9px;
+    padding:11px 16px;
+    display:flex;
+    gap:26px;
+    color:var(--ink);
+    font-size:13px;
+    font-weight:600;
+  }
+  .name-row .line{
+    flex:1;
+    border-bottom:1.4px dotted #B9BFCF;
+    display:flex;
+    gap:6px;
+  }
+  .name-row .line span{color:var(--ink-soft); font-weight:600;}
+
+  /* body grid */
+  .sheet-body{
+    padding:24px 30px 30px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  .section{
+    border-radius:12px;
+    padding:16px 18px 18px;
+    border:1.5px solid var(--line);
+  }
+  .section.pg{background:linear-gradient(180deg, var(--teal-soft) 0%, #fff 120px); grid-column:1;}
+  .section.isian{background:linear-gradient(180deg, var(--violet-soft) 0%, #fff 120px); grid-column:2;}
+  .section.uraian{background:linear-gradient(180deg, var(--coral-soft) 0%, #fff 120px); grid-column:1/3;}
+
+  .sec-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:5px 12px 5px 10px;
+    border-radius:20px;
+    font-size:11.5px;
+    font-weight:800;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    color:#fff;
+    margin-bottom:4px;
+  }
+  .pg .sec-tag{background:var(--teal);}
+  .isian .sec-tag{background:var(--violet);}
+  .uraian .sec-tag{background:var(--coral);}
+  .sec-instr{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin:2px 0 12px;
+    font-style:italic;
+  }
+
+  .qitem{margin-bottom:13px;}
+  .qitem:last-child{margin-bottom:0;}
+  .qnum{
+    font-weight:800;
+    font-size:13px;
+    display:inline;
+  }
+  .qtext{
+    font-size:13px;
+    line-height:1.5;
+    display:inline;
+    outline:none;
+  }
+  .opts{
+    margin-top:5px;
+    padding-left:19px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:2px 8px;
+    font-size:12.5px;
+    color:var(--ink);
+  }
+  .opts div{outline:none;}
+  .blank-line{
+    display:inline-block;
+    min-width:120px;
+    border-bottom:1.3px dotted #9AA2B5;
+    margin-left:4px;
+  }
+
+  .uraian .qitem{margin-bottom:14px;}
+  .answer-lines{
+    margin-top:5px;
+    padding-left:19px;
+  }
+  .answer-lines .aline{
+    height:16px;
+    border-bottom:1px dotted #C9CCD8;
+    margin-bottom:4px;
+  }
+
+  .tip-box{
+    margin:0 30px 26px;
+    background:var(--gold-soft);
+    border-radius:12px;
+    padding:14px 16px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    border:1.5px dashed var(--gold);
+  }
+  .tip-icon{
+    width:34px;height:34px;border-radius:50%;
+    background:var(--navy);
+    color:var(--gold-soft);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif; font-weight:900; font-size:15px;
+    flex-shrink:0;
+  }
+  .tip-text b{
+    display:block;
+    font-family:'Fraunces', serif;
+    font-size:13px;
+    color:var(--navy-deep);
+    margin-bottom:2px;
+  }
+  .tip-text{font-size:12px; line-height:1.55; color:var(--ink);}
+
+  .sheet-footer{
+    background:var(--navy-deep);
+    color:#8291B3;
+    font-size:10.5px;
+    text-align:center;
+    padding:9px;
+    letter-spacing:.02em;
+  }
+
+  [contenteditable="true"]:hover{background:rgba(217,164,65,.12); border-radius:3px;}
+
+  .empty-state{
+    padding:70px 30px;
+    text-align:center;
+    color:var(--ink-soft);
+  }
+  .empty-state .em-icon{font-size:34px; margin-bottom:10px;}
+  .empty-state b{color:var(--navy); font-family:'Fraunces',serif; font-size:16px; display:block; margin-bottom:6px;}
+  .empty-state p{font-size:13px; max-width:340px; margin:0 auto; line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============ CONTROL PANEL ============ -->
+  <div class="panel">
+    <div>
+      <h1>Generator LKPD</h1>
+      <p class="sub">Isi topik pembelajaran, biarkan AI menyusun soal pilihan ganda, isian, dan uraian — lalu unduh sebagai PNG siap cetak.</p>
+    </div>
+
+    <div class="field">
+      <label>Gemini API Key <span style="color:#7D89A8;font-weight:500;text-transform:none;">(gratis)</span></label>
+      <input id="f-apikey" type="password" placeholder="AIza...">
+    </div>
+    <p class="hint">Belum punya? Ambil gratis tanpa kartu kredit di <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#8FDCC0;">aistudio.google.com/apikey</a>. Key hanya disimpan sementara di browser ini, tidak dikirim ke mana pun selain ke Google.</p>
+
+    <div class="field">
+      <label>Nama Sekolah</label>
+      <input id="f-sekolah" type="text" value="SDN 2 Karangmangu">
+    </div>
+
+    <div class="row3">
+      <div class="field" style="grid-column:1/3;">
+        <label>Mata Pelajaran</label>
+        <input id="f-mapel" type="text" value="IPAS" placeholder="mis. IPAS, Matematika">
+      </div>
+      <div class="field">
+        <label>Kelas</label>
+        <input id="f-kelas" type="text" value="6">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Topik / Materi</label>
+      <textarea id="f-topik" rows="2" placeholder="mis. Sistem Pencernaan Manusia">Sistem Pencernaan Manusia</textarea>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="field" style="margin-bottom:-6px;">
+      <label>Jumlah Soal per Bagian</label>
+    </div>
+    <div class="counts">
+      <div class="field">
+        <label>Pil. Ganda</label>
+        <input id="f-pg" type="number" min="2" max="10" value="5">
+      </div>
+      <div class="field">
+        <label>Isian</label>
+        <input id="f-isian" type="number" min="2" max="10" value="5">
+      </div>
+      <div class="field">
+        <label>Uraian</label>
+        <input id="f-uraian" type="number" min="1" max="6" value="3">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <button class="btn btn-primary" id="btn-generate">✨ Generate Soal dengan AI</button>
+    <div class="status" id="status"></div>
+
+    <button class="btn btn-secondary" id="btn-download" disabled>⬇ Unduh sebagai PNG</button>
+    <button class="btn btn-ghost" id="btn-regenerate" disabled>↻ Buat Ulang Soal</button>
+
+    <div class="panel-footer">
+      Menggunakan Gemini 2.5 Flash (tier gratis Google, tanpa kartu kredit) — lebih cepat dan stabil dibanding layanan tanpa-key. Setelah soal muncul, semua teks pada lembar bisa langsung diklik dan diedit sebelum diunduh.
+    </div>
+  </div>
+
+  <!-- ============ PREVIEW ============ -->
+  <div class="preview-wrap">
+    <div class="toolbar">
+      <span class="label">Pratinjau LKPD — klik teks untuk mengedit</span>
+      <div class="actions"></div>
+    </div>
+
+    <div id="sheet">
+      <div class="empty-state" id="empty-state">
+        <div class="em-icon">📝</div>
+        <b>Belum ada LKPD</b>
+        <p>Isi topik di panel kiri lalu klik "Generate Soal dengan AI" untuk membuat lembar kerja peserta didik secara otomatis.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const el = id => document.getElementById(id);
+const statusEl = el('status');
+const btnGenerate = el('btn-generate');
+const btnDownload = el('btn-download');
+const btnRegenerate = el('btn-regenerate');
+const sheet = el('sheet');
+
+function setStatus(msg, type){
+  statusEl.textContent = msg || '';
+  statusEl.className = 'status' + (type ? ' ' + type : '');
+}
+
+function escapeHtml(str){
+  return String(str ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+async function generateContent(){
+  const apiKey = el('f-apikey').value.trim();
+  const sekolah = el('f-sekolah').value.trim() || 'Sekolah';
+  const mapel = el('f-mapel').value.trim() || 'IPAS';
+  const kelas = el('f-kelas').value.trim() || '6';
+  const topik = el('f-topik').value.trim();
+  const nPg = Math.max(2, Math.min(10, parseInt(el('f-pg').value) || 5));
+  const nIsian = Math.max(2, Math.min(10, parseInt(el('f-isian').value) || 5));
+  const nUraian = Math.max(1, Math.min(6, parseInt(el('f-uraian').value) || 3));
+
+  if(!apiKey){
+    setStatus('Masukkan Gemini API Key dulu (gratis, lihat link di bawah kolomnya).', 'error');
+    return null;
+  }
+  if(!topik){
+    setStatus('Isi dulu topik/materinya ya.', 'error');
+    return null;
+  }
+
+  btnGenerate.disabled = true;
+  btnRegenerate.disabled = true;
+  setStatus('AI sedang menyusun soal, mohon tunggu...', '');
+
+  const prompt = `Kamu adalah guru SD berpengalaman di Indonesia yang sedang menyusun LKPD (Lembar Kerja Peserta Didik) untuk kelas ${kelas} SD, mata pelajaran ${mapel}, dengan topik "${topik}".
+
+Buatkan konten LKPD dalam Bahasa Indonesia sesuai kurikulum SD, dengan tingkat kesulitan yang sesuai untuk anak kelas ${kelas} SD. Balas HANYA dengan JSON valid, tanpa teks pembuka, tanpa penjelasan, tanpa markdown code fence. Struktur JSON harus persis seperti ini:
+
+{
+  "tujuan": "satu kalimat tujuan pembelajaran singkat",
+  "pilihanGanda": [
+    {"soal": "teks soal", "a": "pilihan a", "b": "pilihan b", "c": "pilihan c", "d": "pilihan d"}
+  ],
+  "isian": [
+    {"soal": "kalimat rumpang atau pertanyaan singkat untuk dijawab satu-dua kata"}
+  ],
+  "uraian": [
+    {"soal": "pertanyaan esai yang butuh jawaban beberapa kalimat"}
+  ],
+  "faktaMenarik": "satu fakta menarik singkat terkait topik ini untuk kotak 'Tahukah Kamu', 1-2 kalimat"
+}
+
+Buat tepat ${nPg} soal pilihanGanda, ${nIsian} soal isian, dan ${nUraian} soal uraian. Jangan sertakan kunci jawaban. Soal harus bervariasi, jelas, dan sesuai topik.`;
+
+  try{
+    const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey
+      },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.8,
+          responseMimeType: "application/json"
+        }
+      })
+    });
+
+    if(!response.ok){
+      const errBody = await response.json().catch(() => null);
+      const msg = errBody?.error?.message || ('status ' + response.status);
+      if(response.status === 400 && /API key/i.test(msg)){
+        throw new Error('API key tidak valid. Periksa kembali key-nya.');
+      }
+      if(response.status === 404 || /no longer available|not found/i.test(msg)){
+        throw new Error('Model Gemini yang dipakai sudah tidak tersedia (Google sering ganti versi). Coba lagi — kalau masih gagal, beri tahu saya supaya modelnya diperbarui.');
+      }
+      if(response.status === 429){
+        throw new Error('Kuota gratis harian/menit sedang penuh. Tunggu sebentar lalu coba lagi.');
+      }
+      throw new Error(msg);
+    }
+
+    const data = await response.json();
+    const candidate = data.candidates && data.candidates[0];
+    let raw = (candidate?.content?.parts || []).map(p => p.text || '').join('\n').trim();
+    if(!raw){
+      const finishReason = candidate?.finishReason;
+      throw new Error(finishReason ? ('AI tidak menghasilkan teks (alasan: ' + finishReason + ')') : 'AI tidak menghasilkan teks.');
+    }
+    raw = raw.replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+
+    let parsed;
+    try{
+      parsed = JSON.parse(raw);
+    }catch(e){
+      const match = raw.match(/\{[\s\S]*\}/);
+      if(match){ parsed = JSON.parse(match[0]); }
+      else throw new Error('Format jawaban AI tidak sesuai.');
+    }
+
+    return { sekolah, mapel, kelas, topik, data: parsed };
+  }catch(err){
+    console.error(err);
+    setStatus('Gagal generate: ' + err.message + '. Coba lagi.', 'error');
+    return null;
+  }finally{
+    btnGenerate.disabled = false;
+    btnRegenerate.disabled = false;
+  }
+}
+
+function renderSheet(ctx){
+  const { sekolah, mapel, kelas, topik, data } = ctx;
+  const pg = data.pilihanGanda || [];
+  const isian = data.isian || [];
+  const uraian = data.uraian || [];
+  const optLetters = ['a','b','c','d'];
+
+  const pgHtml = pg.map((q, i) => `
+    <div class="qitem">
+      <span class="qnum">${i+1}.</span> <span class="qtext" contenteditable="true">${escapeHtml(q.soal)}</span>
+      <div class="opts">
+        ${optLetters.map(L => `<div contenteditable="true">${L}. ${escapeHtml(q[L] || '')}</div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  const isianHtml = isian.map((q, i) => `
+    <div class="qitem">
+      <span class="qnum">${i+1}.</span> <span class="qtext" contenteditable="true">${escapeHtml(q.soal)}</span><span class="blank-line"></span>
+    </div>
+  `).join('');
+
+  const uraianHtml = uraian.map((q, i) => `
+    <div class="qitem">
+      <span class="qnum">${i+1}.</span> <span class="qtext" contenteditable="true">${escapeHtml(q.soal)}</span>
+      <div class="answer-lines">
+        <div class="aline"></div>
+        <div class="aline"></div>
+      </div>
+    </div>
+  `).join('');
+
+  sheet.innerHTML = `
+    <div class="sheet-header">
+      <div class="badge-row">
+        <div class="seal">LK</div>
+        <div>
+          <div class="eyebrow">Lembar Kerja Peserta Didik</div>
+        </div>
+      </div>
+      <div class="h-title" contenteditable="true">${escapeHtml(mapel)} — ${escapeHtml(topik)}</div>
+      <div class="h-meta" contenteditable="true">Kelas ${escapeHtml(kelas)} · ${escapeHtml(sekolah)}</div>
+      <div class="h-goal"><b>Tujuan:</b> <span contenteditable="true">${escapeHtml(data.tujuan || '')}</span></div>
+      <div class="name-row">
+        <div class="line"><span>Nama :</span></div>
+        <div class="line" style="flex:.5"><span>Kelas :</span></div>
+      </div>
+    </div>
+
+    <div class="sheet-body">
+      <div class="section pg">
+        <div class="sec-tag">A · Pilihan Ganda</div>
+        <div class="sec-instr">Pilihlah jawaban yang paling tepat!</div>
+        ${pgHtml}
+      </div>
+      <div class="section isian">
+        <div class="sec-tag">B · Isian</div>
+        <div class="sec-instr">Isilah titik-titik dengan jawaban yang tepat!</div>
+        ${isianHtml}
+      </div>
+      <div class="section uraian">
+        <div class="sec-tag">C · Uraian</div>
+        <div class="sec-instr">Jawablah pertanyaan berikut dengan jelas!</div>
+        ${uraianHtml}
+      </div>
+    </div>
+
+    ${data.faktaMenarik ? `
+    <div class="tip-box">
+      <div class="tip-icon">!</div>
+      <div class="tip-text"><b>Tahukah Kamu?</b><span contenteditable="true">${escapeHtml(data.faktaMenarik)}</span></div>
+    </div>` : ''}
+
+    <div class="sheet-footer">LKPD dibuat otomatis dengan bantuan AI — periksa kembali sebelum digunakan di kelas</div>
+  `;
+
+  btnDownload.disabled = false;
+  btnRegenerate.disabled = false;
+}
+
+btnGenerate.addEventListener('click', async () => {
+  const ctx = await generateContent();
+  if(ctx){
+    renderSheet(ctx);
+    setStatus('Soal berhasil dibuat. Klik teks mana pun untuk mengedit sebelum diunduh.', 'ok');
+  }
+});
+
+btnRegenerate.addEventListener('click', () => btnGenerate.click());
+
+btnDownload.addEventListener('click', async () => {
+  btnDownload.disabled = true;
+  const prevLabel = btnDownload.textContent;
+  btnDownload.textContent = 'Menyiapkan gambar...';
+  try{
+    const canvas = await html2canvas(sheet, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true
+    });
+    const link = document.createElement('a');
+    link.download = 'lkpd-' + (el('f-topik').value.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-') || 'worksheet') + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }catch(err){
+    console.error(err);
+    setStatus('Gagal membuat PNG: ' + err.message, 'error');
+  }finally{
+    btnDownload.disabled = false;
+    btnDownload.textContent = prevLabel;
+  }
+});
+</script>
+</body>
+</html>
