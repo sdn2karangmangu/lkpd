@@ -6,7 +6,7 @@
 <title>Generator LKPD AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;0,900;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;0,900;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
@@ -132,11 +132,20 @@
     color:#fff;
   }
   .btn-secondary:hover{filter:brightness(1.08);}
+  .btn-secondary:disabled{opacity:.5; cursor:default; filter:none;}
+  .btn-word{
+    background:#2F5FA8;
+    color:#fff;
+  }
+  .btn-word:hover{filter:brightness(1.1);}
+  .btn-word:disabled{opacity:.5; cursor:default; filter:none;}
   .btn-ghost{
     background:transparent;
     border:1px solid #33456A;
     color:#C9D2E6;
   }
+  .btn-row{display:flex; gap:8px;}
+  .btn-row .btn{flex:1; padding:12px 8px; font-size:13px;}
   .status{
     font-size:12.5px;
     color:#A9B4CE;
@@ -181,9 +190,6 @@
     color:var(--ink-soft);
     font-weight:600;
   }
-  .toolbar .actions{display:flex; gap:8px;}
-  .toolbar .btn{padding:9px 14px; font-size:13px;}
-  .toolbar .btn-secondary{background:var(--navy); color:#fff;}
 
   #sheet{
     width:794px;
@@ -198,7 +204,7 @@
   /* header */
   .sheet-header{
     background:linear-gradient(120deg, var(--navy) 0%, var(--navy-deep) 100%);
-    padding:26px 30px 22px;
+    padding:26px 30px 34px;
     position:relative;
     color:#fff;
     overflow:hidden;
@@ -210,6 +216,22 @@
     width:220px; height:220px;
     border-radius:50%;
     background:radial-gradient(circle, rgba(217,164,65,.22) 0%, rgba(217,164,65,0) 70%);
+  }
+  .sheet-header::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:14px 14px;
+    pointer-events:none;
+  }
+  .header-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+    position:relative;
+    z-index:1;
   }
   .badge-row{
     display:flex;
@@ -242,7 +264,7 @@
     font-size:27px;
     line-height:1.18;
     margin:2px 0 4px;
-    max-width:520px;
+    max-width:480px;
   }
   .h-meta{
     display:inline-block;
@@ -254,6 +276,29 @@
     font-weight:600;
     margin-top:4px;
   }
+  .nilai-box{
+    flex-shrink:0;
+    width:96px;
+    background:#fff;
+    border-radius:10px;
+    padding:9px 10px 11px;
+    text-align:center;
+    box-shadow:0 4px 14px rgba(0,0,0,.18);
+  }
+  .nilai-box .nb-label{
+    font-size:9.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    font-weight:800;
+    color:var(--ink-soft);
+  }
+  .nilai-box .nb-value{
+    margin-top:6px;
+    height:30px;
+    border:1.5px dashed var(--gold);
+    border-radius:6px;
+    background:var(--gold-soft);
+  }
   .h-goal{
     margin-top:14px;
     background:rgba(255,255,255,.07);
@@ -263,6 +308,8 @@
     font-size:12.5px;
     line-height:1.55;
     max-width:640px;
+    position:relative;
+    z-index:1;
   }
   .h-goal b{color:var(--gold-soft);}
   .name-row{
@@ -271,10 +318,12 @@
     border-radius:9px;
     padding:11px 16px;
     display:flex;
-    gap:26px;
+    gap:22px;
     color:var(--ink);
     font-size:13px;
     font-weight:600;
+    position:relative;
+    z-index:1;
   }
   .name-row .line{
     flex:1;
@@ -282,40 +331,63 @@
     display:flex;
     gap:6px;
   }
-  .name-row .line span{color:var(--ink-soft); font-weight:600;}
+  .name-row .line.short{flex:.6;}
+  .name-row .line span{color:var(--ink-soft); font-weight:600; white-space:nowrap;}
+
+  /* torn-ticket perforation between header and body */
+  .perforation{
+    height:16px;
+    margin-top:-16px;
+    position:relative;
+    z-index:1;
+    background:
+      radial-gradient(circle at 12px 0, transparent 8px, var(--cream) 8.5px) 0 0/24px 16px repeat-x;
+  }
 
   /* body grid */
   .sheet-body{
-    padding:24px 30px 30px;
+    padding:8px 30px 30px;
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:20px;
+    background-image:radial-gradient(#EDE6D3 1px, transparent 1px);
+    background-size:16px 16px;
   }
   .section{
     border-radius:12px;
     padding:16px 18px 18px;
     border:1.5px solid var(--line);
+    background:var(--paper);
   }
-  .section.pg{background:linear-gradient(180deg, var(--teal-soft) 0%, #fff 120px); grid-column:1;}
-  .section.isian{background:linear-gradient(180deg, var(--violet-soft) 0%, #fff 120px); grid-column:2;}
-  .section.uraian{background:linear-gradient(180deg, var(--coral-soft) 0%, #fff 120px); grid-column:1/3;}
+  .section.pg{background:linear-gradient(180deg, var(--teal-soft) 0%, #fff 130px); grid-column:1;}
+  .section.isian{background:linear-gradient(180deg, var(--violet-soft) 0%, #fff 130px); grid-column:2;}
+  .section.uraian{background:linear-gradient(180deg, var(--coral-soft) 0%, #fff 130px); grid-column:1/3;}
 
-  .sec-tag{
-    display:inline-flex;
+  .sec-head{
+    display:flex;
     align-items:center;
-    gap:7px;
-    padding:5px 12px 5px 10px;
-    border-radius:20px;
-    font-size:11.5px;
-    font-weight:800;
-    letter-spacing:.03em;
-    text-transform:uppercase;
-    color:#fff;
+    gap:9px;
     margin-bottom:4px;
   }
-  .pg .sec-tag{background:var(--teal);}
-  .isian .sec-tag{background:var(--violet);}
-  .uraian .sec-tag{background:var(--coral);}
+  .sec-num{
+    width:24px; height:24px;
+    border-radius:50%;
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;
+    font-weight:800;
+    font-size:12px;
+    color:#fff;
+  }
+  .pg .sec-num{background:var(--teal);}
+  .isian .sec-num{background:var(--violet);}
+  .uraian .sec-num{background:var(--coral);}
+  .sec-tag{
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.02em;
+    color:var(--navy);
+  }
   .sec-instr{
     font-size:11.5px;
     color:var(--ink-soft);
@@ -337,15 +409,16 @@
     outline:none;
   }
   .opts{
-    margin-top:5px;
+    margin-top:6px;
     padding-left:19px;
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:2px 8px;
+    gap:3px 8px;
     font-size:12.5px;
     color:var(--ink);
   }
   .opts div{outline:none;}
+  .opts div b{color:var(--teal); margin-right:3px;}
   .blank-line{
     display:inline-block;
     min-width:120px;
@@ -419,7 +492,7 @@
   <div class="panel">
     <div>
       <h1>Generator LKPD</h1>
-      <p class="sub">Isi topik pembelajaran, biarkan AI menyusun soal pilihan ganda, isian, dan uraian — lalu unduh sebagai PNG siap cetak.</p>
+      <p class="sub">Isi topik pembelajaran, biarkan AI menyusun soal pilihan ganda, isian, dan uraian — lalu unduh sebagai PNG atau Word siap cetak.</p>
     </div>
 
     <div class="field">
@@ -474,11 +547,14 @@
     <button class="btn btn-primary" id="btn-generate">✨ Generate Soal dengan AI</button>
     <div class="status" id="status"></div>
 
-    <button class="btn btn-secondary" id="btn-download" disabled>⬇ Unduh sebagai PNG</button>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btn-download" disabled>⬇ PNG</button>
+      <button class="btn btn-word" id="btn-word" disabled>⬇ Word</button>
+    </div>
     <button class="btn btn-ghost" id="btn-regenerate" disabled>↻ Buat Ulang Soal</button>
 
     <div class="panel-footer">
-      Menggunakan Gemini 2.5 Flash (tier gratis Google, tanpa kartu kredit) — lebih cepat dan stabil dibanding layanan tanpa-key. Setelah soal muncul, semua teks pada lembar bisa langsung diklik dan diedit sebelum diunduh.
+      Menggunakan Gemini 2.5 Flash (tier gratis Google, tanpa kartu kredit) — lebih cepat dan stabil dibanding layanan tanpa-key. Setelah soal muncul, semua teks pada lembar bisa langsung diklik dan diedit sebelum diunduh — hasil edit ikut terbawa ke file PNG maupun Word.
     </div>
   </div>
 
@@ -486,7 +562,6 @@
   <div class="preview-wrap">
     <div class="toolbar">
       <span class="label">Pratinjau LKPD — klik teks untuk mengedit</span>
-      <div class="actions"></div>
     </div>
 
     <div id="sheet">
@@ -504,8 +579,10 @@ const el = id => document.getElementById(id);
 const statusEl = el('status');
 const btnGenerate = el('btn-generate');
 const btnDownload = el('btn-download');
+const btnWord = el('btn-word');
 const btnRegenerate = el('btn-regenerate');
 const sheet = el('sheet');
+let lastCtx = null;
 
 function setStatus(msg, type){
   statusEl.textContent = msg || '';
@@ -517,6 +594,48 @@ function escapeHtml(str){
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[c]));
 }
+
+// Gemini structured-output schema: forces well-formed fields for every
+// question so the model can't blur a multiple-choice item into a fill-in
+// item or vice versa.
+const responseSchema = {
+  type: "OBJECT",
+  properties: {
+    tujuan: { type: "STRING" },
+    pilihanGanda: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          soal: { type: "STRING" },
+          a: { type: "STRING" },
+          b: { type: "STRING" },
+          c: { type: "STRING" },
+          d: { type: "STRING" }
+        },
+        required: ["soal", "a", "b", "c", "d"]
+      }
+    },
+    isian: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: { soal: { type: "STRING" } },
+        required: ["soal"]
+      }
+    },
+    uraian: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: { soal: { type: "STRING" } },
+        required: ["soal"]
+      }
+    },
+    faktaMenarik: { type: "STRING" }
+  },
+  required: ["tujuan", "pilihanGanda", "isian", "uraian", "faktaMenarik"]
+};
 
 async function generateContent(){
   const apiKey = el('f-apikey').value.trim();
@@ -543,23 +662,23 @@ async function generateContent(){
 
   const prompt = `Kamu adalah guru SD berpengalaman di Indonesia yang sedang menyusun LKPD (Lembar Kerja Peserta Didik) untuk kelas ${kelas} SD, mata pelajaran ${mapel}, dengan topik "${topik}".
 
-Buatkan konten LKPD dalam Bahasa Indonesia sesuai kurikulum SD, dengan tingkat kesulitan yang sesuai untuk anak kelas ${kelas} SD. Balas HANYA dengan JSON valid, tanpa teks pembuka, tanpa penjelasan, tanpa markdown code fence. Struktur JSON harus persis seperti ini:
+Buatkan konten LKPD dalam Bahasa Indonesia sesuai kurikulum SD, dengan tingkat kesulitan yang sesuai untuk anak kelas ${kelas} SD.
 
-{
-  "tujuan": "satu kalimat tujuan pembelajaran singkat",
-  "pilihanGanda": [
-    {"soal": "teks soal", "a": "pilihan a", "b": "pilihan b", "c": "pilihan c", "d": "pilihan d"}
-  ],
-  "isian": [
-    {"soal": "kalimat rumpang atau pertanyaan singkat untuk dijawab satu-dua kata"}
-  ],
-  "uraian": [
-    {"soal": "pertanyaan esai yang butuh jawaban beberapa kalimat"}
-  ],
-  "faktaMenarik": "satu fakta menarik singkat terkait topik ini untuk kotak 'Tahukah Kamu', 1-2 kalimat"
-}
+Buat tepat ${nPg} soal pilihanGanda, ${nIsian} soal isian, dan ${nUraian} soal uraian. Jangan sertakan kunci jawaban.
 
-Buat tepat ${nPg} soal pilihanGanda, ${nIsian} soal isian, dan ${nUraian} soal uraian. Jangan sertakan kunci jawaban. Soal harus bervariasi, jelas, dan sesuai topik.`;
+ATURAN PENTING supaya setiap jenis soal benar-benar berbeda bentuk dan tidak tertukar:
+
+1. PILIHAN GANDA (pilihanGanda): satu pertanyaan dengan 4 pilihan jawaban (a,b,c,d) yang SEMUANYA masuk akal, jelas berbeda satu sama lain, dan hanya SATU yang benar. Jangan gunakan pilihan seperti "semua benar" atau "tidak ada yang benar". Jangan buat pilihan yang maknanya tumpang-tindih. Jawaban benar harus bisa ditentukan pasti dari materi, bukan opini.
+
+2. ISIAN (isian): pertanyaan atau kalimat singkat yang jawabannya HANYA 1-3 kata atau satu angka/istilah (bukan kalimat panjang, bukan penjelasan). Tulis sebagai kalimat langsung yang menanyakan satu fakta/istilah/angka spesifik, bukan pertanyaan "mengapa" atau "jelaskan" (itu untuk uraian) dan bukan pertanyaan bercabang dengan beberapa opsi tersirat (itu untuk pilihan ganda).
+
+3. URAIAN (uraian): pertanyaan yang meminta penjelasan, alasan, langkah, atau perbandingan, dengan jawaban minimal 1-2 kalimat lengkap. Jangan buat uraian yang jawabannya bisa hanya satu kata (itu untuk isian).
+
+4. Setiap soal di ketiga bagian harus membahas sub-topik atau fakta yang BERBEDA satu sama lain. Jangan menanyakan fakta persis yang sama di lebih dari satu bagian (misalnya jangan menanyakan istilah yang sama di pilihan ganda dan isian).
+
+5. Gunakan bahasa yang sederhana dan sesuai usia anak kelas ${kelas} SD.
+
+Field "tujuan" diisi satu kalimat tujuan pembelajaran singkat. Field "faktaMenarik" diisi satu fakta menarik terkait topik ini untuk kotak "Tahukah Kamu", 1-2 kalimat.`;
 
   try{
     const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
@@ -573,7 +692,8 @@ Buat tepat ${nPg} soal pilihanGanda, ${nIsian} soal isian, dan ${nUraian} soal u
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.8,
-          responseMimeType: "application/json"
+          responseMimeType: "application/json",
+          responseSchema: responseSchema
         }
       })
     });
@@ -633,7 +753,7 @@ function renderSheet(ctx){
     <div class="qitem">
       <span class="qnum">${i+1}.</span> <span class="qtext" contenteditable="true">${escapeHtml(q.soal)}</span>
       <div class="opts">
-        ${optLetters.map(L => `<div contenteditable="true">${L}. ${escapeHtml(q[L] || '')}</div>`).join('')}
+        ${optLetters.map(L => `<div contenteditable="true"><b>${L}.</b> ${escapeHtml(q[L] || '')}</div>`).join('')}
       </div>
     </div>
   `).join('');
@@ -656,34 +776,42 @@ function renderSheet(ctx){
 
   sheet.innerHTML = `
     <div class="sheet-header">
-      <div class="badge-row">
-        <div class="seal">LK</div>
+      <div class="header-top">
         <div>
-          <div class="eyebrow">Lembar Kerja Peserta Didik</div>
+          <div class="badge-row">
+            <div class="seal">LK</div>
+            <div class="eyebrow">Lembar Kerja Peserta Didik</div>
+          </div>
+          <div class="h-title" contenteditable="true">${escapeHtml(mapel)} — ${escapeHtml(topik)}</div>
+          <div class="h-meta" contenteditable="true">Kelas ${escapeHtml(kelas)} · ${escapeHtml(sekolah)}</div>
+        </div>
+        <div class="nilai-box">
+          <div class="nb-label">Nilai</div>
+          <div class="nb-value"></div>
         </div>
       </div>
-      <div class="h-title" contenteditable="true">${escapeHtml(mapel)} — ${escapeHtml(topik)}</div>
-      <div class="h-meta" contenteditable="true">Kelas ${escapeHtml(kelas)} · ${escapeHtml(sekolah)}</div>
       <div class="h-goal"><b>Tujuan:</b> <span contenteditable="true">${escapeHtml(data.tujuan || '')}</span></div>
       <div class="name-row">
         <div class="line"><span>Nama :</span></div>
-        <div class="line" style="flex:.5"><span>Kelas :</span></div>
+        <div class="line short"><span>Kelas :</span></div>
+        <div class="line short"><span>Tanggal :</span></div>
       </div>
     </div>
+    <div class="perforation"></div>
 
     <div class="sheet-body">
       <div class="section pg">
-        <div class="sec-tag">A · Pilihan Ganda</div>
+        <div class="sec-head"><div class="sec-num">A</div><div class="sec-tag">Pilihan Ganda</div></div>
         <div class="sec-instr">Pilihlah jawaban yang paling tepat!</div>
         ${pgHtml}
       </div>
       <div class="section isian">
-        <div class="sec-tag">B · Isian</div>
+        <div class="sec-head"><div class="sec-num">B</div><div class="sec-tag">Isian</div></div>
         <div class="sec-instr">Isilah titik-titik dengan jawaban yang tepat!</div>
         ${isianHtml}
       </div>
       <div class="section uraian">
-        <div class="sec-tag">C · Uraian</div>
+        <div class="sec-head"><div class="sec-num">C</div><div class="sec-tag">Uraian</div></div>
         <div class="sec-instr">Jawablah pertanyaan berikut dengan jelas!</div>
         ${uraianHtml}
       </div>
@@ -699,12 +827,14 @@ function renderSheet(ctx){
   `;
 
   btnDownload.disabled = false;
+  btnWord.disabled = false;
   btnRegenerate.disabled = false;
 }
 
 btnGenerate.addEventListener('click', async () => {
   const ctx = await generateContent();
   if(ctx){
+    lastCtx = ctx;
     renderSheet(ctx);
     setStatus('Soal berhasil dibuat. Klik teks mana pun untuk mengedit sebelum diunduh.', 'ok');
   }
@@ -715,7 +845,7 @@ btnRegenerate.addEventListener('click', () => btnGenerate.click());
 btnDownload.addEventListener('click', async () => {
   btnDownload.disabled = true;
   const prevLabel = btnDownload.textContent;
-  btnDownload.textContent = 'Menyiapkan gambar...';
+  btnDownload.textContent = 'Menyiapkan...';
   try{
     const canvas = await html2canvas(sheet, {
       scale: 2,
@@ -732,6 +862,142 @@ btnDownload.addEventListener('click', async () => {
   }finally{
     btnDownload.disabled = false;
     btnDownload.textContent = prevLabel;
+  }
+});
+
+/* ---------------- WORD EXPORT ----------------
+   Reads the *live* (possibly hand-edited) sheet DOM and rebuilds it as a
+   Word-compatible HTML document (mso namespaces + inline styles, tables
+   instead of flex/grid since Word's renderer only understands basic HTML).
+   Saved with a .doc extension, which Word/LibreOffice open natively. */
+function collectSheetData(){
+  const title = sheet.querySelector('.h-title')?.innerText.trim() || '';
+  const meta = sheet.querySelector('.h-meta')?.innerText.trim() || '';
+  const tujuan = sheet.querySelector('.h-goal span')?.innerText.trim() || '';
+  const pgItems = [...sheet.querySelectorAll('.section.pg .qitem')].map(item => ({
+    qtext: item.querySelector('.qtext')?.innerText.trim() || '',
+    opts: [...item.querySelectorAll('.opts div')].map(d => d.innerText.trim())
+  }));
+  const isianItems = [...sheet.querySelectorAll('.section.isian .qitem')].map(
+    item => item.querySelector('.qtext')?.innerText.trim() || ''
+  );
+  const uraianItems = [...sheet.querySelectorAll('.section.uraian .qitem')].map(
+    item => item.querySelector('.qtext')?.innerText.trim() || ''
+  );
+  const fakta = sheet.querySelector('.tip-text span')?.innerText.trim() || '';
+  return { title, meta, tujuan, pgItems, isianItems, uraianItems, fakta };
+}
+
+function buildWordHtml(d){
+  const esc = escapeHtml;
+  const pgRows = d.pgItems.map((q, i) => `
+    <p style="margin:0 0 4px;"><b>${i+1}. ${esc(q.qtext)}</b></p>
+    <table style="margin:0 0 12px; border:none;" cellpadding="2" cellspacing="0">
+      ${[0,2].map(r => `
+      <tr>
+        <td style="border:none; width:260px; padding:1px 8px 1px 20px;">${esc(q.opts[r] || '')}</td>
+        <td style="border:none; width:260px; padding:1px 8px;">${esc(q.opts[r+1] || '')}</td>
+      </tr>`).join('')}
+    </table>
+  `).join('');
+
+  const isianRows = d.isianItems.map((q, i) => `
+    <p style="margin:0 0 14px;">${i+1}. ${esc(q)}
+      <span style="display:inline-block; min-width:160px; border-bottom:1px dotted #888;">&nbsp;</span>
+    </p>
+  `).join('');
+
+  const uraianRows = d.uraianItems.map((q, i) => `
+    <p style="margin:0 0 4px;">${i+1}. ${esc(q)}</p>
+    <p style="margin:0 0 4px 20px; border-bottom:1px dotted #999; height:18px;">&nbsp;</p>
+    <p style="margin:0 0 14px 20px; border-bottom:1px dotted #999; height:18px;">&nbsp;</p>
+  `).join('');
+
+  return `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>${esc(d.title)}</title>
+<!--[if gte mso 9]>
+<xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml>
+<![endif]-->
+<style>
+  @page { size: 21cm 29.7cm; margin: 2cm 2cm 2cm 2cm; }
+  body { font-family: Calibri, Arial, sans-serif; font-size: 11.5pt; color: #22293B; }
+  h1 { font-family: Georgia, "Times New Roman", serif; color: #1B2A4A; font-size: 17pt; margin: 0 0 4px; }
+  .kop { background:#1B2A4A; color:#fff; padding:14px 16px; border-radius:4px; }
+  .kop .eyebrow { font-size:9pt; letter-spacing:1px; text-transform:uppercase; color:#F3DFAE; font-weight:bold; margin:0 0 4px; }
+  .kop .meta { font-size:10.5pt; color:#F3DFAE; margin-top:4px; }
+  .goal { background:#F3DFAE; border-left:4px solid #D9A441; padding:8px 12px; font-size:10.5pt; margin:10px 0 14px; }
+  .identity td { padding:4px 10px; font-size:10.5pt; border-bottom:1px dotted #999; }
+  .sec-title { font-size:12.5pt; font-weight:bold; color:#fff; padding:5px 10px; margin:18px 0 4px; border-radius:3px; }
+  .sec-title.pg { background:#2A9D8F; }
+  .sec-title.isian { background:#7B5EA7; }
+  .sec-title.uraian { background:#E0637A; }
+  .sec-instr { font-style:italic; font-size:9.5pt; color:#5B6478; margin:0 0 10px; }
+  .fakta { background:#F3DFAE; border:1px dashed #D9A441; padding:10px 12px; margin-top:16px; font-size:10pt; }
+  .fakta b { color:#1B2A4A; }
+  .footer { text-align:center; font-size:8.5pt; color:#8291B3; margin-top:18px; }
+</style>
+</head>
+<body>
+
+  <div class="kop">
+    <div class="eyebrow">Lembar Kerja Peserta Didik</div>
+    <h1 style="color:#fff;">${esc(d.title)}</h1>
+    <div class="meta">${esc(d.meta)}</div>
+  </div>
+
+  <div class="goal"><b>Tujuan:</b> ${esc(d.tujuan)}</div>
+
+  <table class="identity" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td width="40%">Nama&nbsp;: &nbsp;</td>
+      <td width="30%">Kelas&nbsp;: &nbsp;</td>
+      <td width="30%">Tanggal&nbsp;: &nbsp;</td>
+    </tr>
+  </table>
+
+  <div class="sec-title pg">A &nbsp;·&nbsp; Pilihan Ganda</div>
+  <div class="sec-instr">Pilihlah jawaban yang paling tepat!</div>
+  ${pgRows}
+
+  <div class="sec-title isian">B &nbsp;·&nbsp; Isian</div>
+  <div class="sec-instr">Isilah titik-titik dengan jawaban yang tepat!</div>
+  ${isianRows}
+
+  <div class="sec-title uraian">C &nbsp;·&nbsp; Uraian</div>
+  <div class="sec-instr">Jawablah pertanyaan berikut dengan jelas!</div>
+  ${uraianRows}
+
+  ${d.fakta ? `<div class="fakta"><b>Tahukah Kamu?</b> ${esc(d.fakta)}</div>` : ''}
+
+  <div class="footer">LKPD dibuat otomatis dengan bantuan AI — periksa kembali sebelum digunakan di kelas</div>
+
+</body>
+</html>`;
+}
+
+btnWord.addEventListener('click', () => {
+  btnWord.disabled = true;
+  const prevLabel = btnWord.textContent;
+  btnWord.textContent = 'Menyiapkan...';
+  try{
+    const d = collectSheetData();
+    const html = buildWordHtml(d);
+    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'lkpd-' + (el('f-topik').value.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-') || 'worksheet') + '.doc';
+    link.click();
+    URL.revokeObjectURL(url);
+  }catch(err){
+    console.error(err);
+    setStatus('Gagal membuat Word: ' + err.message, 'error');
+  }finally{
+    btnWord.disabled = false;
+    btnWord.textContent = prevLabel;
   }
 });
 </script>
